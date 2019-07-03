@@ -1,0 +1,18 @@
+[package]
+name = "en-one-for-all"
+version = "0.1.0"
+authors = ["neverfelly <neverfelly@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+serde_json = "1.0"
+reqwest = "0.9.18"
+percent-encoding = "1.0.1"
+xml-rs = "0.8.0"
+
+[dependencies.clap]
+version = "2.33"
+default-features = false
+
+[build-dependencies]
+clap = "2.33"
