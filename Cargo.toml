@@ -5,6 +5,8 @@ authors = ["neverfelly <neverfelly@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+rand = "0.7.0"
+serde = "1.0.94"
 serde_json = "1.0"
 reqwest = "0.9.18"
 percent-encoding = "1.0.1"
