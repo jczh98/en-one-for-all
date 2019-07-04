@@ -1,11 +1,19 @@
 extern crate clap;
 extern crate reqwest;
+extern crate ansi_term;
+extern crate itertools;
+extern crate scraper;
 
 use clap::{App, SubCommand, Arg};
+use scraper::Html;
+use tempfile::NamedTempFile;
 
 mod dict;
+mod util;
+mod parser;
 
 use crate::dict::*;
+use crate::parser::*;
 
 fn main() {
     let matches = App::new("enofa")
@@ -18,6 +26,10 @@ fn main() {
                          .short("v")
                          .long("voice")
                          .help("show voice."))
+                    .arg(Arg::with_name("more")
+                         .short("m")
+                         .long("more")
+                         .help("show more."))
                     .arg(Arg::with_name("accent")
                          .short("a")
                          .long("accent")
@@ -35,10 +47,15 @@ fn main() {
     match matches.subcommand() {
         ("dict", Some(dict_matches)) => {
             let mut voice = false;
+            let mut more = false;
             let mut accent = 1;
             if dict_matches.is_present("voice") {
                 println!("allows voice.");
                 voice = true;
+            }
+            if dict_matches.is_present("more") {
+                println!("allows more.");
+                more = true;
             }
             if let Some(accent_type) = dict_matches.value_of("accent") {
                 println!("accent is {}", accent_type);
@@ -49,12 +66,16 @@ fn main() {
                 println!("Cloning {}", word);
                 words.push(String::from(word));
             }
-            let dict = Dict::new(words, voice, accent);
-            let mut body = reqwest::get(dict.query_url().as_str())
+            let dict = Dict::new(words, voice, accent, more);
+            let body = reqwest::get(dict.query_url().as_str())
                 .unwrap()
                 .text()
                 .unwrap();
-            println!("{}", body);
+            let document = Html::parse_document(&body);
+            if let Err(e) = parse_and_print(&document, &dict.query_string(), dict.words.len() > 1) {
+                panic!(format!("{:?}", e));
+            }
+
         },
         ("", None) => println!("No subcommand was uesd"),
         _ => unreachable!(),
