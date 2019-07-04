@@ -32,7 +32,7 @@ impl Dict {
             "{}{}{}",
             String::from("https://dict.youdao.com/dictvoice?audio="),
             utf8_percent_encode(&self.words.join("+")[..], DEFAULT_ENCODE_SET).to_string(),
-            format!("{}", self.config.accent))
+            format!("&type={}", self.config.accent))
     }
 
     pub fn query_string(&self) -> String {

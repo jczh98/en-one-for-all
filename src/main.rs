@@ -7,6 +7,8 @@ extern crate scraper;
 use clap::{App, SubCommand, Arg};
 use scraper::Html;
 use tempfile::NamedTempFile;
+use std::process::Command;
+use std::io::prelude::*;
 
 mod dict;
 mod util;
@@ -75,9 +77,31 @@ fn main() {
             if let Err(e) = parse_and_print(&document, &dict.query_string(), dict.words.len() > 1) {
                 panic!(format!("{:?}", e));
             }
-
+            if dict.is_voice() {
+                if let Err(e) =  play_sound(&dict) {
+                    panic!(format!("{:?}", e));
+                }
+            }
         },
         ("", None) => println!("No subcommand was uesd"),
         _ => unreachable!(),
     }
+}
+
+fn play_sound(dict: &Dict) -> Result<(), String> {
+    println!("voice url is {}", dict.voice_url());
+    let mut voice_response = reqwest::get(dict.voice_url().as_str())
+        .map_err(|e| format!("{}", e))?;
+    let mut buf: Vec<u8> = vec![];
+    voice_response.copy_to(&mut buf)
+        .map_err(|e| format!("{}", e))?;
+    let mut file = NamedTempFile::new()
+        .map_err(|e| format!("{}", e))?;
+    file.write_all(&buf)
+        .map_err(|e| format!("{}", e))?;
+    Command::new("mpg123")
+        .arg(file.path().as_os_str())
+        .output()
+        .map_err(|e| format!("{}", e))?;
+    Ok(())
 }
