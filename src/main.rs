@@ -43,7 +43,6 @@ fn main() {
         .get_matches();
 
     if let Some(word) = matches.value_of("query") {
-        println!("word is {}", word);
     }
 
     match matches.subcommand() {
@@ -52,20 +51,16 @@ fn main() {
             let mut more = false;
             let mut accent = 1;
             if dict_matches.is_present("voice") {
-                println!("allows voice.");
                 voice = true;
             }
             if dict_matches.is_present("more") {
-                println!("allows more.");
                 more = true;
             }
             if let Some(accent_type) = dict_matches.value_of("accent") {
-                println!("accent is {}", accent_type);
                 accent = accent_type.parse().unwrap();
             }
             let mut words = Vec::new();
             for word in dict_matches.values_of("word").unwrap() {
-                println!("Cloning {}", word);
                 words.push(String::from(word));
             }
             let dict = Dict::new(words, voice, accent, more);
@@ -89,7 +84,6 @@ fn main() {
 }
 
 fn play_sound(dict: &Dict) -> Result<(), String> {
-    println!("voice url is {}", dict.voice_url());
     let mut voice_response = reqwest::get(dict.voice_url().as_str())
         .map_err(|e| format!("{}", e))?;
     let mut buf: Vec<u8> = vec![];
